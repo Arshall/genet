@@ -5,7 +5,9 @@ extern crate genet_derive;
 
 /** # Example 
 aaa
+  dddfdf  dfdfdf
 */
+/// ddddd
 #[derive(Attr)]
 #[genet(range = "0..5")]
 struct PayloadLen {}

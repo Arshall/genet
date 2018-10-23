@@ -3,14 +3,22 @@ extern crate genet_sdk;
 #[macro_use]
 extern crate genet_derive;
 
+#[derive(Attr)]
+struct EthLayer {
+    plen: PayloadLen
+}
+
 /** # Example 
 aaa
   dddfdf  dfdfdf
 */
 /// ddddd
 #[derive(Attr)]
-#[genet(range = "0..5")]
-struct PayloadLen {}
+struct PayloadLen {
+    #[genet(range = "0..5")]
+    #[genet(little_endian)]
+    __: u16
+}
 
 use genet_sdk::{cast, decoder::*, prelude::*};
 

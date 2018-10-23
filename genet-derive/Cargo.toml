@@ -9,6 +9,7 @@ authors = ["Ron Hashimoto <mail@h2so5.net>"]
 proc-macro2 = "0.4"
 quote = "0.6.3"
 syn = "0.15"
+Inflector = "0.11"
 
 [lib]
 proc-macro = true

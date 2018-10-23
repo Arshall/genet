@@ -1,5 +1,15 @@
 extern crate genet_sdk;
 
+#[macro_use]
+extern crate genet_derive;
+
+/** # Example 
+aaa
+*/
+#[derive(Attr)]
+#[genet(range = "0..5")]
+struct PayloadLen {}
+
 use genet_sdk::{cast, decoder::*, prelude::*};
 
 struct EthWorker {}

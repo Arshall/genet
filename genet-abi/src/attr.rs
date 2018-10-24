@@ -11,22 +11,6 @@ use token::Token;
 use variant::Variant;
 use vec::SafeVec;
 
-trait PxAttr {
-    fn id() -> Token;
-    fn name() -> String {
-        "".into()
-    }
-    fn description() -> String {
-        "".into()
-    }
-    fn bit_range() -> Range<usize> {
-        0..0
-    }
-    fn width() -> usize {
-        0
-    }
-}
-
 /// A builder object for Attr.
 pub struct AttrBuilder {
     class: Fixed<AttrClass>,

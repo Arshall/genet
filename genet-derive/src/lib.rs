@@ -4,21 +4,25 @@ extern crate quote;
 #[macro_use]
 extern crate syn;
 
+extern crate inflector;
 extern crate proc_macro;
 extern crate proc_macro2;
-extern crate inflector;
 
+use inflector::cases::camelcase::to_camel_case;
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
 use quote::ToTokens;
-use syn::{Attribute, Data, Fields, DeriveInput, Ident, Lit, Meta, MetaNameValue};
-use inflector::cases::camelcase::to_camel_case;
+use syn::{Attribute, Data, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue};
 
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    println!("{:?} {}", parse_docs(&input.attrs), parse_ident(&input.ident));
+    println!(
+        "{:?} {}",
+        parse_docs(&input.attrs),
+        parse_ident(&input.ident)
+    );
 
     if let Data::Struct(s) = input.data {
         if let Fields::Named(f) = s.fields {
@@ -33,7 +37,9 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 }
 
 fn parse_ident(ident: &Ident) -> String {
-    to_camel_case(&ident.to_string()).trim_right_matches("Attr").into()
+    to_camel_case(&ident.to_string())
+        .trim_right_matches("Attr")
+        .into()
 }
 
 fn parse_docs(attrs: &[Attribute]) -> (String, String) {

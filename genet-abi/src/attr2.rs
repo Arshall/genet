@@ -2,7 +2,7 @@ use attr::AttrClass;
 use fixed::Fixed;
 use result::Result;
 use slice::{ByteSlice, TryGet};
-use std::mem::size_of;
+use std::{mem::size_of, ops::Deref};
 
 fn as_bool_placeholder(_data: &ByteSlice) -> Result<bool> {
     Ok(false)
@@ -32,7 +32,7 @@ fn as_buffer_placeholder(_data: &ByteSlice) -> Result<Box<[u8]>> {
     Ok(Vec::new().into())
 }
 
-trait PxAttrType {
+trait AttrType {
     fn as_bool() -> fn(&ByteSlice) -> Result<bool> {
         as_bool_placeholder
     }
@@ -59,29 +59,90 @@ trait PxAttrType {
 
     fn as_buffer() -> fn(&ByteSlice) -> Result<Box<[u8]>> {
         as_buffer_placeholder
-    }
+    }    
+}
 
-    fn byte_size(&self) -> Option<usize> {
-        None
-    }
-
-    fn children(&self) -> &[Fixed<AttrClass>] {
-        &[]
+trait AttrNode: AttrType {
+    fn children(&self) -> Vec<AttrClass> {
+        vec![]
     }
 }
 
-impl PxAttrType for u8 {
+trait Static: AttrNode {
+    fn byte_size(&self) -> usize;
+}
+
+struct AttrField<T: AttrNode> {
+    attr: T,
+    class: Fixed<AttrClass>,
+}
+
+impl<T: AttrNode> AttrField<T> {
+    fn new(attr: T) -> Self {
+        Self {
+            attr,
+            class: Fixed::new(AttrClass::builder("bool").typ("@bool").build()),
+        }
+    }
+
+    fn class(&self) -> &Fixed<AttrClass> {
+        &self.class
+    }
+}
+
+impl<T: AttrNode> Deref for AttrField<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.attr
+    }
+}
+
+impl<T: AttrNode> AsRef<Fixed<AttrClass>> for AttrField<T> {
+    fn as_ref(&self) -> &Fixed<AttrClass> {
+        &self.class
+    }
+}
+
+struct StaticAttrField<T: Static> {
+    byte_size: usize,
+    field: AttrField<T>,
+}
+
+impl<T: Static> StaticAttrField<T> {
+    fn new(attr: T) -> Self {
+        Self {
+            byte_size: attr.byte_size(),
+            field: AttrField::new(attr),
+        }
+    }
+
+    fn class(&self) -> &Fixed<AttrClass> {
+        self.field.class()
+    }
+
+    fn byte_size(&self) -> usize {
+        self.byte_size
+    }
+}
+
+struct EthAttr {
+    plen: StaticAttrField<Uint8>,
+    nrn: AttrField<Uint8>,
+}
+
+struct Uint8 {}
+
+impl AttrType for Uint8 {
     fn as_u64() -> fn(&ByteSlice) -> Result<u64> {
         |data| Ok(data.try_get(0)? as u64)
     }
-
-    fn byte_size(&self) -> Option<usize> {
-        Some(size_of::<u8>())
-    }
 }
 
-impl PxAttrType for ByteSlice {
-    fn as_slice() -> fn(&ByteSlice) -> Result<ByteSlice> {
-        |data| Ok(data.clone())
+impl AttrNode for Uint8 {}
+
+impl Static for Uint8 {
+    fn byte_size(&self) -> usize {
+        1
     }
 }

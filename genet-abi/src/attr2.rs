@@ -2,7 +2,10 @@ use attr::AttrClass;
 use fixed::Fixed;
 use result::Result;
 use slice::{ByteSlice, TryGet};
-use std::{mem::size_of, ops::Deref};
+use std::{
+    mem::size_of,
+    ops::{Deref, DerefMut},
+};
 
 fn as_bool_placeholder(_data: &ByteSlice) -> Result<bool> {
     Ok(false)
@@ -33,37 +36,37 @@ fn as_buffer_placeholder(_data: &ByteSlice) -> Result<Box<[u8]>> {
 }
 
 trait AttrType {
-    fn as_bool() -> fn(&ByteSlice) -> Result<bool> {
+    fn as_bool(&self) -> fn(&ByteSlice) -> Result<bool> {
         as_bool_placeholder
     }
 
-    fn as_u64() -> fn(&ByteSlice) -> Result<u64> {
+    fn as_u64(&self) -> fn(&ByteSlice) -> Result<u64> {
         as_u64_placeholder
     }
 
-    fn as_i64() -> fn(&ByteSlice) -> Result<i64> {
+    fn as_i64(&self) -> fn(&ByteSlice) -> Result<i64> {
         as_i64_placeholder
     }
 
-    fn as_f64() -> fn(&ByteSlice) -> Result<f64> {
+    fn as_f64(&self) -> fn(&ByteSlice) -> Result<f64> {
         as_f64_placeholder
     }
 
-    fn as_str() -> fn(&ByteSlice) -> Result<Box<str>> {
+    fn as_str(&self) -> fn(&ByteSlice) -> Result<Box<str>> {
         as_str_placeholder
     }
 
-    fn as_slice() -> fn(&ByteSlice) -> Result<ByteSlice> {
+    fn as_slice(&self) -> fn(&ByteSlice) -> Result<ByteSlice> {
         as_slice_placeholder
     }
 
-    fn as_buffer() -> fn(&ByteSlice) -> Result<Box<[u8]>> {
+    fn as_buffer(&self) -> fn(&ByteSlice) -> Result<Box<[u8]>> {
         as_buffer_placeholder
-    }    
+    }
 }
 
 trait AttrNode: AttrType {
-    fn children(&self) -> Vec<AttrClass> {
+    fn children<'a>(&'a mut self) -> Vec<&'a mut AttrType> {
         vec![]
     }
 }
@@ -74,19 +77,16 @@ trait Static: AttrNode {
 
 struct AttrField<T: AttrNode> {
     attr: T,
-    class: Fixed<AttrClass>,
+    class: Option<Fixed<AttrClass>>,
 }
 
 impl<T: AttrNode> AttrField<T> {
     fn new(attr: T) -> Self {
-        Self {
-            attr,
-            class: Fixed::new(AttrClass::builder("bool").typ("@bool").build()),
-        }
+        Self { attr, class: None }
     }
 
     fn class(&self) -> &Fixed<AttrClass> {
-        &self.class
+        &self.class.as_ref().unwrap()
     }
 }
 
@@ -98,9 +98,15 @@ impl<T: AttrNode> Deref for AttrField<T> {
     }
 }
 
+impl<T: AttrNode> DerefMut for AttrField<T> {
+    fn deref_mut(&mut self) -> &mut T {
+        &mut self.attr
+    }
+}
+
 impl<T: AttrNode> AsRef<Fixed<AttrClass>> for AttrField<T> {
     fn as_ref(&self) -> &Fixed<AttrClass> {
-        &self.class
+        self.class()
     }
 }
 
@@ -126,6 +132,20 @@ impl<T: Static> StaticAttrField<T> {
     }
 }
 
+impl<T: Static> Deref for StaticAttrField<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        self.field.deref()
+    }
+}
+
+impl<T: Static> DerefMut for StaticAttrField<T> {
+    fn deref_mut(&mut self) -> &mut T {
+        self.field.deref_mut()
+    }
+}
+
 struct EthAttr {
     plen: StaticAttrField<Uint8>,
     nrn: AttrField<Uint8>,
@@ -134,7 +154,7 @@ struct EthAttr {
 struct Uint8 {}
 
 impl AttrType for Uint8 {
-    fn as_u64() -> fn(&ByteSlice) -> Result<u64> {
+    fn as_u64(&self) -> fn(&ByteSlice) -> Result<u64> {
         |data| Ok(data.try_get(0)? as u64)
     }
 }
@@ -144,5 +164,22 @@ impl AttrNode for Uint8 {}
 impl Static for Uint8 {
     fn byte_size(&self) -> usize {
         1
+    }
+}
+
+struct Group {
+    inn: AttrField<Uint8>,
+    innx: StaticAttrField<Uint8>,
+}
+
+impl AttrType for Group {
+    fn as_u64(&self) -> fn(&ByteSlice) -> Result<u64> {
+        |data| Ok(data.try_get(0)? as u64)
+    }
+}
+
+impl AttrNode for Group {
+    fn children<'a>(&'a mut self) -> Vec<&'a mut AttrType> {
+        vec![self.inn.deref_mut(), self.innx.deref_mut()]
     }
 }

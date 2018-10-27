@@ -7,14 +7,7 @@ extern crate genet_derive;
 struct EthLayer {
     /// Payload Length
     /// Length of the payload
-    plen: PayloadLen,
-}
-
-#[derive(Attr)]
-struct PayloadLen {
-    #[genet(range = "0..5")]
-    #[genet(little_endian)]
-    __: u16,
+    plen: u8,
 }
 
 use genet_sdk::{cast, decoder::*, prelude::*};

@@ -17,6 +17,14 @@ use syn::{Attribute, Data, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue,
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
+/*
+    let name = "444";
+    let expanded = quote! {
+        Str {
+            ii: #name.into()
+        }
+    };
+    println!("{:?}", expanded);
 
     if let Data::Struct(s) = input.data {
         if let Fields::Named(f) = s.fields {
@@ -31,8 +39,16 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
             }
         }
     }
-
-    let tokens = quote!{};
+*/
+    let ident = input.ident;
+    let tokens = quote!{
+        impl ::genet_sdk::attr::AttrNode for #ident {
+            fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext) -> ::genet_sdk::attr::AttrClass {
+                use ::genet_sdk::attr::AttrClass;
+                AttrClass::builder(&ctx.path).build()
+            }
+        }
+    };
     tokens.into()
 }
 

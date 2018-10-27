@@ -11,7 +11,6 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 pub mod attr;
-pub mod attr2;
 pub mod cast;
 pub mod context;
 pub mod decoder;

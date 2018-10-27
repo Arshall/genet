@@ -11,6 +11,19 @@ use token::Token;
 use variant::Variant;
 use vec::SafeVec;
 
+#[derive(Debug, Default)]
+pub struct AttrContext {
+    pub path: String,
+    pub typ: String,
+    pub name: String,
+    pub description: String,
+    pub byte_offset: usize,
+}
+
+pub trait AttrNode  {
+    fn init(&mut self, ctx: &AttrContext) -> AttrClass;
+}
+
 /// A builder object for Attr.
 pub struct AttrBuilder {
     class: Fixed<AttrClass>,

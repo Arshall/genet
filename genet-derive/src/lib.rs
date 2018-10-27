@@ -12,22 +12,22 @@ use inflector::cases::camelcase::to_camel_case;
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
 use quote::ToTokens;
-use syn::{Attribute, Data, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue};
+use syn::{Attribute, Data, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue, Type, TypePath};
 
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
-    println!(
-        "{:?} {}",
-        parse_docs(&input.attrs),
-        parse_ident(&input.ident)
-    );
-
     if let Data::Struct(s) = input.data {
         if let Fields::Named(f) = s.fields {
             for field in f.named {
-                println!("{:?}", field.ident);
+                println!("{:?} {:?}", field.ident, parse_docs(&field.attrs));
+                if let Type::Path(p) = field.ty {
+                    println!(
+                        "{:?}",
+                        p == syn::parse_str::<TypePath>("PayloadLen").unwrap()
+                    );
+                }
             }
         }
     }

@@ -5,14 +5,11 @@ extern crate genet_derive;
 
 #[derive(Attr)]
 struct EthLayer {
+    /// Payload Length
+    /// Length of the payload
     plen: PayloadLen,
 }
 
-/** # Example 
-aaa
-  dddfdf  dfdfdf
-*/
-/// ddddd
 #[derive(Attr)]
 struct PayloadLen {
     #[genet(range = "0..5")]

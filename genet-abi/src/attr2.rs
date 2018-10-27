@@ -7,6 +7,7 @@ use std::{
     ops::{Deref, DerefMut, Range},
 };
 
+#[derive(Debug)]
 struct AttrContext {
     path: String,
     typ: String,
@@ -79,7 +80,9 @@ trait AttrType {
 }
 
 trait AttrNode: AttrType {
-    fn init(&mut self, ctx: &AttrContext) {}
+    fn init(&mut self, ctx: &AttrContext) -> AttrClass {
+        AttrClass::builder(&ctx.path).build()
+    }
 
     fn children(&self) -> Vec<AttrChild> {
         Vec::new()
@@ -102,6 +105,11 @@ impl<T: AttrNode> AttrField<T> {
 
     fn class(&self) -> &Fixed<AttrClass> {
         &self.class.as_ref().unwrap()
+    }
+
+    fn init(&mut self, ctx: &AttrContext) {
+        let class = self.attr.init(ctx);
+        self.class = Some(Fixed::new(class));
     }
 }
 
@@ -134,6 +142,10 @@ impl<T: SizedAttrNode> FixedAttrField<T> {
 
     fn class(&self) -> &Fixed<AttrClass> {
         self.field.class()
+    }
+
+    fn init(&mut self, ctx: &AttrContext) {
+        self.field.init(ctx);
     }
 
     fn byte_size(&self) -> usize {

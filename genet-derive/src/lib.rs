@@ -35,6 +35,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
     
     */
     let mut fields_id = Vec::new();
+    let mut fields_typ = Vec::new();
     let mut fields_name = Vec::new();
     let mut fields_desc = Vec::new();
 
@@ -44,6 +45,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 if let Some(ident) = field.ident {
                     fields_id.push(to_camel_case(&ident.to_string()));
                     let mata = parse_attrs(&field.attrs);
+                    fields_typ.push(mata.typ);
                     fields_name.push(mata.name);
                     fields_desc.push(mata.description);
                 }
@@ -70,6 +72,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     {
                         let ctx = AttrContext{
                             path: format!("{}.{}", ctx.path, #fields_id),
+                            typ: #fields_typ.into(),
                             name: #fields_name.into(),
                             description: #fields_desc.into(),
                             ..Default::default()
@@ -98,28 +101,32 @@ fn parse_attrs(attrs: &[Attribute]) -> AttrMetadata {
     let mut docs = String::new();
     for attr in attrs {
         if let Some(meta) = attr.interpret_meta() {
-            match meta.name().to_string().as_str() {
-                "doc" => {
-                    if let Meta::NameValue(MetaNameValue {
+            let name = meta.name().to_string();
+            match (name.as_str(), meta) {
+                (
+                    "doc",
+                    Meta::NameValue(MetaNameValue {
                         lit: Lit::Str(lit_str),
                         ..
-                    }) = meta
-                    {
-                        docs += &lit_str.value();
-                        docs += "\n";
-                    }
+                    }),
+                ) => {
+                    docs += &lit_str.value();
+                    docs += "\n";
                 }
-                "genet" => {
-                    if let Meta::List(list) = meta {
-                        for item in list.nested {
-                            if let NestedMeta::Meta(meta) = item {
-                                let name = meta.name().to_string();
-                                if let Meta::NameValue(MetaNameValue {
-                                    lit: Lit::Str(lit_str),
-                                    ..
-                                }) = meta
-                                {
-                                    println!("@@ {} {}", name, lit_str.value().to_string());
+                ("genet", Meta::List(list)) => {
+                    for item in list.nested {
+                        if let NestedMeta::Meta(meta) = item {
+                            let name = meta.name().to_string();
+                            if let Meta::NameValue(MetaNameValue {
+                                lit: Lit::Str(lit_str),
+                                ..
+                            }) = meta
+                            {
+                                match name.as_str() {
+                                    "typ" => {
+                                        typ = lit_str.value().to_string();
+                                    }
+                                    _ => {}
                                 }
                             }
                         }

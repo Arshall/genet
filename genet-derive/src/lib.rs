@@ -12,7 +12,7 @@ extern crate proc_macro;
 extern crate proc_macro2;
 
 use genet_abi::attr::AttrContext;
-use inflector::cases::camelcase::to_camel_case;
+use inflector::cases::{camelcase::to_camel_case, titlecase::to_title_case};
 use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
 use quote::ToTokens;
@@ -34,7 +34,11 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     let meta = parse_attrs(&field.attrs);
                     let id = to_camel_case(&ident.to_string());
                     let typ = meta.typ;
-                    let name = meta.name;
+                    let name = if meta.name.is_empty() {
+                        to_title_case(&ident.to_string())
+                    } else {
+                        meta.name
+                    };
                     let desc = meta.description;
                     fields_ctx.push(quote!{
                         AttrContext{
@@ -122,7 +126,7 @@ fn parse_attrs(attrs: &[Attribute]) -> AttrMetadata {
                                     "alias" => {
                                         aliases.push(lit_str.value().to_string());
                                     }
-                                    _ => panic!("unsupported attribute: {}", name)
+                                    _ => panic!("unsupported attribute: {}", name),
                                 }
                             }
                         }

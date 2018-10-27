@@ -8,6 +8,7 @@ struct EthLayer {
     /// Payload Length
     /// Length of the payload
     #[genet(typ = "@ipv4:addr")]
+    #[genet(alias = "_.src", alias = "_.xxx")]
     payload_len: u8,
 }
 

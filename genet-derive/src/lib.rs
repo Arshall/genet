@@ -24,30 +24,27 @@ use syn::{
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    /*
-        let name = "444";
-        let expanded = quote! {
-            Str {
-                ii: #name.into()
-            }
-        };
-        println!("{:?}", expanded);
-    
-    */
-    let mut fields_id = Vec::new();
-    let mut fields_typ = Vec::new();
-    let mut fields_name = Vec::new();
-    let mut fields_desc = Vec::new();
+
+    let mut fields_ctx = Vec::new();
 
     if let Data::Struct(s) = input.data {
         if let Fields::Named(f) = s.fields {
             for field in f.named {
                 if let Some(ident) = field.ident {
-                    fields_id.push(to_camel_case(&ident.to_string()));
-                    let mata = parse_attrs(&field.attrs);
-                    fields_typ.push(mata.typ);
-                    fields_name.push(mata.name);
-                    fields_desc.push(mata.description);
+                    let meta = parse_attrs(&field.attrs);
+                    let id = to_camel_case(&ident.to_string());
+                    let typ = meta.typ;
+                    let name = meta.name;
+                    let desc = meta.description;
+                    fields_ctx.push(quote!{
+                        AttrContext{
+                            path: format!("{}.{}", ctx.path, #id),
+                            typ: #typ.into(),
+                            name: #name.into(),
+                            description: #desc.into(),
+                            ..Default::default()
+                        }
+                    });
                 }
 
                 /*
@@ -70,13 +67,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
                 #(
                     {
-                        let ctx = AttrContext{
-                            path: format!("{}.{}", ctx.path, #fields_id),
-                            typ: #fields_typ.into(),
-                            name: #fields_name.into(),
-                            description: #fields_desc.into(),
-                            ..Default::default()
-                        };
+                        let ctx = #fields_ctx;
                     }
                 )*
 
@@ -94,10 +85,12 @@ struct AttrMetadata {
     pub typ: String,
     pub name: String,
     pub description: String,
+    pub aliases: Vec<String>,
 }
 
 fn parse_attrs(attrs: &[Attribute]) -> AttrMetadata {
     let mut typ = String::new();
+    let mut aliases = Vec::new();
     let mut docs = String::new();
     for attr in attrs {
         if let Some(meta) = attr.interpret_meta() {
@@ -126,7 +119,10 @@ fn parse_attrs(attrs: &[Attribute]) -> AttrMetadata {
                                     "typ" => {
                                         typ = lit_str.value().to_string();
                                     }
-                                    _ => {}
+                                    "alias" => {
+                                        aliases.push(lit_str.value().to_string());
+                                    }
+                                    _ => panic!("unsupported attribute: {}", name)
                                 }
                             }
                         }
@@ -144,5 +140,6 @@ fn parse_attrs(attrs: &[Attribute]) -> AttrMetadata {
         typ: typ.trim().into(),
         name: name.into(),
         description: description.trim().into(),
+        aliases,
     }
 }

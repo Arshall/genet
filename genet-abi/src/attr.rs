@@ -20,7 +20,7 @@ pub struct AttrContext {
     pub byte_offset: usize,
 }
 
-pub trait AttrNode  {
+pub trait AttrNode {
     fn init(&mut self, ctx: &AttrContext) -> AttrClass;
 }
 

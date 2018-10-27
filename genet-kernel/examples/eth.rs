@@ -7,7 +7,8 @@ extern crate genet_derive;
 struct EthLayer {
     /// Payload Length
     /// Length of the payload
-    plen: u8,
+    #[genet(typ = "@ipv4:addr")]
+    payload_len: u8,
 }
 
 use genet_sdk::{cast, decoder::*, prelude::*};

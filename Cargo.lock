@@ -248,7 +248,7 @@ dependencies = [
  "genet-abi 0.5.0",
  "proc-macro2 0.4.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 0.15.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.15.14 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-use attr::Attr;
+use attr::{Attr, AttrContext, AttrNode};
 use fixed::{Fixed, MutFixed};
 use metadata::Metadata;
 use slice::ByteSlice;
@@ -380,6 +380,28 @@ impl LayerClass {
             meta: Metadata::new(),
             aliases: Vec::new(),
             headers: Vec::new(),
+        }
+    }
+
+    pub fn builder2<T: Into<Token>, A: AttrNode>(id: T, attr: A) -> LayerClassBuilder {
+        let id = id.into();
+        let mut attr = attr;
+        let tree = attr.init(&AttrContext {
+            path: id.to_string(),
+            ..AttrContext::default()
+        });
+        LayerClassBuilder {
+            id,
+            meta: Metadata::new(),
+            aliases: tree
+                .aliases
+                .into_iter()
+                .map(|(id, target)| Alias {
+                    id: id.into(),
+                    target: target.into(),
+                })
+                .collect(),
+            headers: tree.attrs.into_iter().map(Fixed::new).collect(),
         }
     }
 

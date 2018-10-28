@@ -68,6 +68,10 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
         }
     }
 
+    let self_attrs = parse_attrs(&input.attrs);
+    let self_name = self_attrs.name;
+    let self_desc = self_attrs.description;
+
     let ident = input.ident;
     let fields_ident2 = fields_ident.clone();
     let tokens = quote!{
@@ -129,8 +133,16 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     class: class.unwrap_or_else(|| Fixed::new(
                         AttrClass::builder(ctx.path.clone())
                         .typ(ctx.typ.clone())
-                        .name(ctx.name)
-                        .description(ctx.description)
+                        .name(if ctx.name.is_empty() {
+                            #self_name
+                        } else {
+                            ctx.name
+                        })
+                        .description(if ctx.description.is_empty() {
+                            #self_desc
+                        } else {
+                            ctx.description
+                        })
                         .build()
                     )),
                     children,

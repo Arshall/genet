@@ -4,12 +4,14 @@ extern crate genet_sdk;
 extern crate genet_derive;
 
 #[derive(Attr, Default)]
+/// Ethernet
 struct EthLayer {
     /// Payload Length
     /// Length of the payload
     #[genet(typ = "@ipv4:addr", alias = "_.src")]
     payload: Field<Sub>,
 
+    /// Nooo
     #[genet(alias = "_.xxx", typ = "@ipv4:addr")]
     payload_len_d: Sub,
 }

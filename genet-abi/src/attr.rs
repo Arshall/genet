@@ -387,9 +387,10 @@ impl fmt::Debug for AttrClass {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "AttrClass {} {}",
+            "AttrClass {} {} {}",
             self.id().to_string(),
             self.typ().to_string(),
+            self.name(),
         )
     }
 }

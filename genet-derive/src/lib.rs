@@ -25,6 +25,7 @@ use syn::{
 pub fn derive_attr(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
+    let mut fields_ident = Vec::new();
     let mut fields_ctx = Vec::new();
 
     if let Data::Struct(s) = input.data {
@@ -49,6 +50,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                             ..Default::default()
                         }
                     });
+                    fields_ident.push(ident);
                 }
 
                 /*
@@ -66,16 +68,23 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
     let ident = input.ident;
     let tokens = quote!{
         impl ::genet_sdk::attr::AttrNode for #ident {
-            fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext) -> ::genet_sdk::attr::AttrClass {
-                use ::genet_sdk::attr::{AttrClass, AttrContext};
+            fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext)
+                -> ::genet_sdk::attr::AttrChild {
+                use ::genet_sdk::attr::{AttrNode, AttrChild, AttrContext};
 
+                let mut attrs = Vec::new();
                 #(
                     {
                         let ctx = #fields_ctx;
+                        let attr : &mut AttrNode = &mut self.#fields_ident;
+                        let mut child = attr.init(&ctx);
+                        attrs.append(&mut child.attrs);
                     }
                 )*
 
-                AttrClass::builder(&ctx.path).build()
+                AttrChild {
+                    attrs
+                }
             }
         }
     };

@@ -6,7 +6,11 @@ use layer::Layer;
 use metadata::Metadata;
 use result::Result;
 use slice::ByteSlice;
-use std::{fmt, io, mem, ops::Range, slice};
+use std::{
+    fmt, io, mem,
+    ops::{Deref, Range},
+    slice,
+};
 use token::Token;
 use variant::Variant;
 use vec::SafeVec;
@@ -20,8 +24,50 @@ pub struct AttrContext {
     pub byte_offset: usize,
 }
 
+pub struct AttrChild {
+    pub attrs: Vec<Fixed<AttrClass>>,
+}
+
 pub trait AttrNode {
-    fn init(&mut self, ctx: &AttrContext) -> AttrClass;
+    fn init(&mut self, ctx: &AttrContext) -> AttrChild;
+}
+
+pub struct Field<T: AttrNode> {
+    attr: T,
+    class: Option<Fixed<AttrClass>>,
+}
+
+impl<T: AttrNode> AttrNode for Field<T> {
+    fn init(&mut self, ctx: &AttrContext) -> AttrChild {
+        let child = self.attr.init(ctx);
+        if let Some(first) = child.attrs.get(0) {
+            self.class = Some(first.clone())
+        }
+        child
+    }
+}
+
+impl<T: AttrNode> Deref for Field<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.attr
+    }
+}
+
+impl<T: AttrNode + Default> Default for Field<T> {
+    fn default() -> Self {
+        Self {
+            attr: T::default(),
+            class: None,
+        }
+    }
+}
+
+impl<T: AttrNode> AsRef<Fixed<AttrClass>> for Field<T> {
+    fn as_ref(&self) -> &Fixed<AttrClass> {
+        self.class.as_ref().unwrap()
+    }
 }
 
 /// A builder object for Attr.

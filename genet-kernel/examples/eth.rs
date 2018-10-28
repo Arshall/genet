@@ -3,23 +3,23 @@ extern crate genet_sdk;
 #[macro_use]
 extern crate genet_derive;
 
-#[derive(Attr)]
+#[derive(Attr, Default)]
 struct EthLayer {
-    _self: u8,
+    _self: Field<Sub>,
 
     /// Payload Length
     /// Length of the payload
     #[genet(typ = "@ipv4:addr")]
     #[genet(alias = "_.src", alias = "_.xxx")]
-    payload_len: Sub,
+    payload_len: Field<Sub>,
 }
 
-#[derive(Attr)]
+#[derive(Attr, Default)]
 struct Sub {
-    payload_len: Uint8,
+    payload_len: Field<Uint8>,
 }
 
-#[derive(Attr)]
+#[derive(Attr, Default)]
 struct Uint8 {}
 
 use genet_sdk::{cast, decoder::*, prelude::*};

@@ -24,8 +24,10 @@ pub struct AttrContext {
     pub byte_offset: usize,
 }
 
+#[derive(Debug)]
 pub struct AttrChild {
     pub attrs: Vec<Fixed<AttrClass>>,
+    pub aliases: Vec<(String, String)>,
 }
 
 pub trait AttrNode {

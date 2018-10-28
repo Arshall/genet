@@ -59,6 +59,11 @@ struct EthDecoder {}
 
 impl Decoder for EthDecoder {
     fn new_worker(&self, _ctx: &Context) -> Box<Worker> {
+        use genet_sdk::attr::AttrNode;
+        let mut d = EthLayer::default();
+        let ch = d.init(&genet_sdk::attr::AttrContext::default());
+        println!("{:?}", ch);
+
         Box::new(EthWorker {})
     }
 

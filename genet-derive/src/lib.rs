@@ -27,6 +27,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
     let mut fields_ident = Vec::new();
     let mut fields_ctx = Vec::new();
+    let mut fields_aliases = Vec::new();
 
     if let Data::Struct(s) = input.data {
         if let Fields::Named(f) = s.fields {
@@ -51,6 +52,12 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                         }
                     });
                     fields_ident.push(ident);
+
+                    for name in meta.aliases {
+                        fields_aliases.push(quote!{
+                            (format!("{}", #name), format!("{}.{}", ctx.path, #id))
+                        });
+                    }
                 }
 
                 /*
@@ -73,17 +80,23 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 use ::genet_sdk::attr::{AttrNode, AttrChild, AttrContext};
 
                 let mut attrs = Vec::new();
+                let mut aliases = vec![
+                    #( #fields_aliases ),*
+                ];
+
                 #(
                     {
                         let ctx = #fields_ctx;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
                         let mut child = attr.init(&ctx);
                         attrs.append(&mut child.attrs);
+                        aliases.append(&mut child.aliases);
                     }
                 )*
 
                 AttrChild {
-                    attrs
+                    attrs,
+                    aliases,
                 }
             }
         }

@@ -86,6 +86,8 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     .typ(ctx.typ.clone())
                     .build()
                 );
+
+                let mut byte_offset = ctx.byte_offset;
                 let mut attrs = Vec::new();
                 let mut children = Vec::new();
                 let mut aliases = vec![
@@ -98,7 +100,13 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                         let attr : &mut AttrNode = &mut self.#fields_ident;
                         let mut child = attr.init(&ctx);
                         if attr.node_type() == AttrNodeType::Static {
-                            attrs.push(Attr::builder(child.class.clone()).build());
+                            let size = attr.byte_size();
+                            attrs.push(
+                                Attr::builder(child.class.clone())
+                                    .range(byte_offset..(byte_offset + size))
+                                    .build()
+                            );
+                            byte_offset += byte_offset;
                         }
                         children.push(child.class.clone());
                         children.append(&mut child.children);

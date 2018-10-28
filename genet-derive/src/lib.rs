@@ -115,10 +115,12 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                         }
 
                         if (attr.node_type() != AttrNodeType::Padding) {
-                            children.push(child.class.clone());
-                            children.append(&mut child.children);
-                            attrs.append(&mut child.attrs);
-                            aliases.append(&mut child.aliases);
+                            if subctx.path != ctx.path {
+                                children.push(child.class.clone());
+                                children.append(&mut child.children);
+                                attrs.append(&mut child.attrs);
+                                aliases.append(&mut child.aliases);
+                            }
                         }
                     }
                 )*

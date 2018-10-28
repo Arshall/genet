@@ -1,4 +1,4 @@
-#![recursion_limit = "128"]
+#![recursion_limit = "256"]
 
 #[macro_use]
 extern crate quote;
@@ -76,14 +76,17 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
     let tokens = quote!{
         impl ::genet_sdk::attr::AttrNode for #ident {
             fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext)
-                -> ::genet_sdk::attr::AttrChild {
-                use ::genet_sdk::attr::{AttrNode, AttrChild, AttrContext, AttrClass};
+                -> ::genet_sdk::attr::AttrList {
+                use ::genet_sdk::attr::{Attr, AttrNode, AttrList, AttrContext, AttrClass, AttrNodeType};
                 use ::genet_sdk::fixed::Fixed;
 
-                let class = Fixed::new(AttrClass::builder("").build());
-                let mut attrs = vec![
-                    class.clone()
-                ];
+                let class = Fixed::new(
+                    AttrClass::builder(ctx.path.clone())
+                    .typ(ctx.typ.clone())
+                    .build()
+                );
+                let mut attrs = Vec::new();
+                let mut children = Vec::new();
                 let mut aliases = vec![
                     #( #fields_aliases ),*
                 ];
@@ -93,13 +96,19 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                         let ctx = #fields_ctx;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
                         let mut child = attr.init(&ctx);
+                        if attr.node_type() == AttrNodeType::Static {
+                            attrs.push(Attr::builder(child.class.clone()).build());
+                        }
+                        children.push(child.class.clone());
+                        children.append(&mut child.children);
                         attrs.append(&mut child.attrs);
                         aliases.append(&mut child.aliases);
                     }
                 )*
 
-                AttrChild {
+                AttrList {
                     class,
+                    children,
                     attrs,
                     aliases,
                 }

@@ -25,9 +25,10 @@ pub struct AttrContext {
 }
 
 #[derive(Debug)]
-pub struct AttrChild {
+pub struct AttrList {
     pub class: Fixed<AttrClass>,
-    pub attrs: Vec<Fixed<AttrClass>>,
+    pub children: Vec<Fixed<AttrClass>>,
+    pub attrs: Vec<Attr>,
     pub aliases: Vec<(String, String)>,
 }
 
@@ -38,7 +39,7 @@ pub enum AttrNodeType {
 }
 
 pub trait AttrNode {
-    fn init(&mut self, ctx: &AttrContext) -> AttrChild;
+    fn init(&mut self, ctx: &AttrContext) -> AttrList;
     fn node_type(&self) -> AttrNodeType;
 }
 
@@ -48,7 +49,7 @@ pub struct Field<T: AttrNode> {
 }
 
 impl<T: AttrNode> AttrNode for Field<T> {
-    fn init(&mut self, ctx: &AttrContext) -> AttrChild {
+    fn init(&mut self, ctx: &AttrContext) -> AttrList {
         let child = self.attr.init(ctx);
         self.class = Some(child.class.clone());
         child
@@ -128,7 +129,12 @@ pub struct Attr {
 
 impl fmt::Debug for Attr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Attr {:?}", self.id())
+        write!(
+            f,
+            "Attr {} {}",
+            self.id().to_string(),
+            self.typ().to_string()
+        )
     }
 }
 

@@ -3,5 +3,5 @@
 //! Type Attr represents an attribute of a Layer.
 
 pub use genet_abi::attr::{
-    Attr, AttrChild, AttrClass, AttrClassBuilder, AttrContext, AttrNode, AttrNodeType, Field,
+    Attr, AttrClass, AttrClassBuilder, AttrContext, AttrList, AttrNode, AttrNodeType, Field,
 };

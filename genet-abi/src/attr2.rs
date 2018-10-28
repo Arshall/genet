@@ -16,7 +16,7 @@ struct AttrContext {
     byte_offset: usize,
 }
 
-struct AttrChild {
+struct AttrList {
     class: Fixed<AttrClass>,
     renge: Option<Range<usize>>,
 }
@@ -84,7 +84,7 @@ trait AttrNode: AttrType {
         AttrClass::builder(&ctx.path).build()
     }
 
-    fn children(&self) -> Vec<AttrChild> {
+    fn children(&self) -> Vec<AttrList> {
         Vec::new()
     }
 }

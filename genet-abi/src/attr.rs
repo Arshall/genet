@@ -19,8 +19,8 @@ use vec::SafeVec;
 pub struct AttrContext {
     pub path: String,
     pub typ: String,
-    pub name: String,
-    pub description: String,
+    pub name: &'static str,
+    pub description: &'static str,
     pub byte_offset: usize,
 }
 
@@ -372,6 +372,17 @@ impl AttrClass {
             }
             _ => Ok(Variant::Nil),
         }
+    }
+}
+
+impl fmt::Debug for AttrClass {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "AttrClass {} {}",
+            self.id().to_string(),
+            self.typ().to_string(),
+        )
     }
 }
 

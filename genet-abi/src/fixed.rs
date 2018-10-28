@@ -16,9 +16,9 @@ pub struct Fixed<T> {
 unsafe impl<T: Send> Send for Fixed<T> {}
 unsafe impl<T: Sync> Sync for Fixed<T> {}
 
-impl<T> fmt::Debug for Fixed<T> {
+impl<T: fmt::Debug> fmt::Debug for Fixed<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Fixed {:?}", self.ptr)
+        unsafe { self.ptr.as_ref().fmt(f) }
     }
 }
 

@@ -64,15 +64,6 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                         });
                     }
                 }
-
-                /*
-                if let Type::Path(p) = field.ty {
-                    println!(
-                        "{:?}",
-                        p == syn::parse_str::<TypePath>("PayloadLen").unwrap()
-                    );
-                }
-                */
             }
         }
     }
@@ -136,6 +127,8 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     class: class.unwrap_or_else(|| Fixed::new(
                         AttrClass::builder(ctx.path.clone())
                         .typ(ctx.typ.clone())
+                        .name(ctx.name)
+                        .description(ctx.description)
                         .build()
                     )),
                     children,
@@ -166,7 +159,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
         }
     };
 
-    println!("{}", tokens.to_string());
+    // println!("{}", tokens.to_string());
 
     tokens.into()
 }

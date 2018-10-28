@@ -103,23 +103,32 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                         } else {
                             &subctx
                         });
-                        if attr.node_type() == AttrNodeType::Static {
-                            if subctx.path == ctx.path {
-                                class = Some(child.class.clone());
-                            } else {
-                                let size = attr.byte_size();
-                                attrs.push(
-                                    Attr::builder(child.class.clone())
-                                        .range(byte_offset..(byte_offset + size))
-                                        .build()
-                                );
-                                byte_offset += byte_offset;
-                            }
+                        match attr.node_type() {
+                            AttrNodeType::Static => {
+                                if subctx.path == ctx.path {
+                                    class = Some(child.class.clone());
+                                } else {
+                                    let size = attr.byte_size();
+                                    attrs.push(
+                                        Attr::builder(child.class.clone())
+                                            .range(byte_offset..(byte_offset + size))
+                                            .build()
+                                    );
+                                    byte_offset += size;
+                                }
+                            },
+                            AttrNodeType::Padding => {
+                                byte_offset += attr.byte_size();
+                            },
+                            _ => {}
                         }
-                        children.push(child.class.clone());
-                        children.append(&mut child.children);
-                        attrs.append(&mut child.attrs);
-                        aliases.append(&mut child.aliases);
+
+                        if (attr.node_type() != AttrNodeType::Padding) {
+                            children.push(child.class.clone());
+                            children.append(&mut child.children);
+                            attrs.append(&mut child.attrs);
+                            aliases.append(&mut child.aliases);
+                        }
                     }
                 )*
 

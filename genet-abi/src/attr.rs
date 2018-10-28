@@ -36,6 +36,7 @@ pub struct AttrList {
 pub enum AttrNodeType {
     Static,
     Dynamic,
+    Padding,
 }
 
 pub trait AttrNode {

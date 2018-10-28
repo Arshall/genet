@@ -1,4 +1,4 @@
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 
 #[macro_use]
 extern crate quote;
@@ -34,7 +34,12 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
             for field in f.named {
                 if let Some(ident) = field.ident {
                     let meta = parse_attrs(&field.attrs);
-                    let id = to_camel_case(&ident.to_string());
+                    let id = ident.to_string();
+                    let id = if id == "_self" {
+                        String::new()
+                    } else {
+                        format!(".{}", to_camel_case(&ident.to_string()))
+                    };
                     let typ = meta.typ;
                     let name = if meta.name.is_empty() {
                         to_title_case(&ident.to_string())
@@ -44,7 +49,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     let desc = meta.description;
                     fields_ctx.push(quote!{
                         AttrContext{
-                            path: format!("{}.{}", ctx.path, #id),
+                            path: format!("{}{}", ctx.path, #id),
                             typ: #typ.into(),
                             name: #name.into(),
                             description: #desc.into(),
@@ -55,7 +60,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
                     for name in meta.aliases {
                         fields_aliases.push(quote!{
-                            (format!("{}", #name), format!("{}.{}", ctx.path, #id))
+                            (format!("{}", #name), format!("{}{}", ctx.path, #id))
                         });
                     }
                 }
@@ -81,12 +86,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 use ::genet_sdk::attr::{Attr, AttrNode, AttrList, AttrContext, AttrClass, AttrNodeType};
                 use ::genet_sdk::fixed::Fixed;
 
-                let class = Fixed::new(
-                    AttrClass::builder(ctx.path.clone())
-                    .typ(ctx.typ.clone())
-                    .build()
-                );
-
+                let mut class = None;
                 let mut byte_offset = ctx.byte_offset;
                 let mut attrs = Vec::new();
                 let mut children = Vec::new();
@@ -96,17 +96,25 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
                 #(
                     {
-                        let ctx = #fields_ctx;
+                        let subctx = #fields_ctx;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
-                        let mut child = attr.init(&ctx);
+                        let mut child = attr.init(if subctx.path == ctx.path {
+                            ctx
+                        } else {
+                            &subctx
+                        });
                         if attr.node_type() == AttrNodeType::Static {
-                            let size = attr.byte_size();
-                            attrs.push(
-                                Attr::builder(child.class.clone())
-                                    .range(byte_offset..(byte_offset + size))
-                                    .build()
-                            );
-                            byte_offset += byte_offset;
+                            if subctx.path == ctx.path {
+                                class = Some(child.class.clone());
+                            } else {
+                                let size = attr.byte_size();
+                                attrs.push(
+                                    Attr::builder(child.class.clone())
+                                        .range(byte_offset..(byte_offset + size))
+                                        .build()
+                                );
+                                byte_offset += byte_offset;
+                            }
                         }
                         children.push(child.class.clone());
                         children.append(&mut child.children);
@@ -116,7 +124,11 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 )*
 
                 AttrList {
-                    class,
+                    class: class.unwrap_or_else(|| Fixed::new(
+                        AttrClass::builder(ctx.path.clone())
+                        .typ(ctx.typ.clone())
+                        .build()
+                    )),
                     children,
                     attrs,
                     aliases,

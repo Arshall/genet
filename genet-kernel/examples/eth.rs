@@ -5,12 +5,10 @@ extern crate genet_derive;
 
 #[derive(Attr, Default)]
 struct EthLayer {
-    _self: Sub,
-
     /// Payload Length
     /// Length of the payload
     #[genet(typ = "@ipv4:addr", alias = "_.src")]
-    payload_len: Field<Sub>,
+    payload: Field<Sub>,
 
     #[genet(alias = "_.xxx", typ = "@ipv4:addr")]
     payload_len_d: Sub,
@@ -18,7 +16,9 @@ struct EthLayer {
 
 #[derive(Attr, Default)]
 struct Sub {
-    payload_len: Field<Uint8>,
+    _self: Uint8,
+    #[genet(alias = "_.xxx", typ = "@ipv6:addr")]
+    payload_len: Uint8,
 }
 
 #[derive(Attr, Default)]

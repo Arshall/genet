@@ -16,6 +16,7 @@ pub mod context;
 pub mod decoder;
 pub mod env;
 pub mod error;
+pub mod field;
 pub mod file;
 pub mod fixed;
 pub mod layer;

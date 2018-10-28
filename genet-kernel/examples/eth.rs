@@ -23,10 +23,7 @@ struct Sub {
     payload_len: Uint8,
 }
 
-#[derive(Attr, Default)]
-struct Uint8 {}
-
-use genet_sdk::{cast, decoder::*, prelude::*};
+use genet_sdk::{cast, decoder::*, field::*, prelude::*};
 
 struct EthWorker {}
 

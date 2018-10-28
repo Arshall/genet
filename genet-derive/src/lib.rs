@@ -161,6 +161,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
                 #(
                     {
+                        // TODO: ignore _self
                         let attr : &AttrNode = &self.#fields_ident2;
                         if attr.node_type() != AttrNodeType::Dynamic {
                             size += attr.bit_size();

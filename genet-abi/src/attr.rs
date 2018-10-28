@@ -45,12 +45,12 @@ pub trait AttrNode {
     fn bit_size(&self) -> usize;
 }
 
-pub struct Field<T: AttrNode> {
+pub struct Detach<T: AttrNode> {
     attr: T,
     class: Option<Fixed<AttrClass>>,
 }
 
-impl<T: AttrNode> AttrNode for Field<T> {
+impl<T: AttrNode> AttrNode for Detach<T> {
     fn init(&mut self, ctx: &AttrContext) -> AttrList {
         let child = self.attr.init(ctx);
         self.class = Some(child.class.clone());
@@ -66,7 +66,7 @@ impl<T: AttrNode> AttrNode for Field<T> {
     }
 }
 
-impl<T: AttrNode> Deref for Field<T> {
+impl<T: AttrNode> Deref for Detach<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -74,7 +74,7 @@ impl<T: AttrNode> Deref for Field<T> {
     }
 }
 
-impl<T: AttrNode + Default> Default for Field<T> {
+impl<T: AttrNode + Default> Default for Detach<T> {
     fn default() -> Self {
         Self {
             attr: T::default(),
@@ -83,7 +83,7 @@ impl<T: AttrNode + Default> Default for Field<T> {
     }
 }
 
-impl<T: AttrNode> AsRef<Fixed<AttrClass>> for Field<T> {
+impl<T: AttrNode> AsRef<Fixed<AttrClass>> for Detach<T> {
     fn as_ref(&self) -> &Fixed<AttrClass> {
         self.class.as_ref().unwrap()
     }

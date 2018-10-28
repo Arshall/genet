@@ -9,7 +9,7 @@ struct EthLayer {
     /// Payload Length
     /// Length of the payload
     #[genet(typ = "@ipv4:addr", alias = "_.src")]
-    payload: Field<Sub>,
+    payload: Detach<Sub>,
 
     /// Nooo
     #[genet(alias = "_.xxx", typ = "@ipv4:addr")]

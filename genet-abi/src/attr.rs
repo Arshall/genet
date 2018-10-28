@@ -314,6 +314,14 @@ impl AttrClass {
         (self.get_typ)(self)
     }
 
+    pub fn name(&self) -> &'static str {
+        self.meta.name()
+    }
+
+    pub fn description(&self) -> &'static str {
+        self.meta.description()
+    }
+
     fn is_value(&self) -> bool {
         (self.is_value)(self) != 0
     }

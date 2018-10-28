@@ -383,16 +383,31 @@ impl LayerClass {
         }
     }
 
-    pub fn builder2<T: Into<Token>, A: AttrNode>(id: T, attr: A) -> LayerClassBuilder {
+    pub fn new<T: Into<Token>, A: AttrNode>(id: T, attr: A) -> LayerClass {
         let id = id.into();
         let mut attr = attr;
         let tree = attr.init(&AttrContext {
             path: id.to_string(),
             ..AttrContext::default()
         });
-        LayerClassBuilder {
-            id,
-            meta: Metadata::new(),
+        let mut meta = Metadata::new();
+        meta.set_name(tree.class.name());
+        meta.set_name(tree.class.description());
+        LayerClass {
+            get_id: abi_id,
+            data: abi_data,
+            attrs_len: abi_attrs_len,
+            attrs_data: abi_attrs_data,
+            aliases_len: abi_aliases_len,
+            aliases_data: abi_aliases_data,
+            headers_len: abi_headers_len,
+            headers_data: abi_headers_data,
+            add_attr: abi_add_attr,
+            payloads_len: abi_payloads_len,
+            payloads_data: abi_payloads_data,
+            add_payload: abi_add_payload,
+            id: id,
+            meta,
             aliases: tree
                 .aliases
                 .into_iter()

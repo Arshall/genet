@@ -16,6 +16,7 @@ struct EthLayer {
 
 #[derive(Attr, Default)]
 struct Sub {
+    #[genet(alias = "_.src2", alias = "_.xxx")]
     payload_len: Field<Uint8>,
 }
 
@@ -59,9 +60,12 @@ struct EthDecoder {}
 
 impl Decoder for EthDecoder {
     fn new_worker(&self, _ctx: &Context) -> Box<Worker> {
-        use genet_sdk::attr::AttrNode;
+        use genet_sdk::attr::{AttrContext, AttrNode};
         let mut d = EthLayer::default();
-        let ch = d.init(&genet_sdk::attr::AttrContext::default());
+        let ch = d.init(&AttrContext {
+            path: "eth".into(),
+            ..AttrContext::default()
+        });
         println!("{:?}", ch);
 
         Box::new(EthWorker {})

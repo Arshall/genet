@@ -77,9 +77,13 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
         impl ::genet_sdk::attr::AttrNode for #ident {
             fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext)
                 -> ::genet_sdk::attr::AttrChild {
-                use ::genet_sdk::attr::{AttrNode, AttrChild, AttrContext};
+                use ::genet_sdk::attr::{AttrNode, AttrChild, AttrContext, AttrClass};
+                use ::genet_sdk::fixed::Fixed;
 
-                let mut attrs = Vec::new();
+                let class = Fixed::new(AttrClass::builder("").build());
+                let mut attrs = vec![
+                    class.clone()
+                ];
                 let mut aliases = vec![
                     #( #fields_aliases ),*
                 ];
@@ -95,9 +99,14 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 )*
 
                 AttrChild {
+                    class,
                     attrs,
                     aliases,
                 }
+            }
+
+            fn node_type(&self) -> ::genet_sdk::attr::AttrNodeType {
+                ::genet_sdk::attr::AttrNodeType::Static
             }
         }
     };

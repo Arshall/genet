@@ -26,12 +26,20 @@ pub struct AttrContext {
 
 #[derive(Debug)]
 pub struct AttrChild {
+    pub class: Fixed<AttrClass>,
     pub attrs: Vec<Fixed<AttrClass>>,
     pub aliases: Vec<(String, String)>,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum AttrNodeType {
+    Static,
+    Dynamic,
+}
+
 pub trait AttrNode {
     fn init(&mut self, ctx: &AttrContext) -> AttrChild;
+    fn node_type(&self) -> AttrNodeType;
 }
 
 pub struct Field<T: AttrNode> {
@@ -42,10 +50,12 @@ pub struct Field<T: AttrNode> {
 impl<T: AttrNode> AttrNode for Field<T> {
     fn init(&mut self, ctx: &AttrContext) -> AttrChild {
         let child = self.attr.init(ctx);
-        if let Some(first) = child.attrs.get(0) {
-            self.class = Some(first.clone())
-        }
+        self.class = Some(child.class.clone());
         child
+    }
+
+    fn node_type(&self) -> AttrNodeType {
+        AttrNodeType::Dynamic
     }
 }
 

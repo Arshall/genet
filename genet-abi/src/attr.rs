@@ -21,7 +21,7 @@ pub struct AttrContext {
     pub typ: String,
     pub name: &'static str,
     pub description: &'static str,
-    pub byte_offset: usize,
+    pub bit_offset: usize,
 }
 
 #[derive(Debug)]

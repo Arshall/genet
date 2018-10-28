@@ -78,7 +78,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 use ::genet_sdk::fixed::Fixed;
 
                 let mut class = None;
-                let mut byte_offset = ctx.byte_offset;
+                let mut bit_offset = ctx.bit_offset;
                 let mut attrs = Vec::new();
                 let mut children = Vec::new();
                 let mut aliases = vec![
@@ -102,14 +102,14 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                                     let size = attr.bit_size();
                                     attrs.push(
                                         Attr::builder(child.class.clone())
-                                            .bit_range(0, byte_offset..(byte_offset + size))
+                                            .bit_range(0, bit_offset..(bit_offset + size))
                                             .build()
                                     );
-                                    byte_offset += size;
+                                    bit_offset += size;
                                 }
                             },
                             AttrNodeType::Padding => {
-                                byte_offset += attr.bit_size();
+                                bit_offset += attr.bit_size();
                             },
                             _ => {}
                         }
@@ -150,7 +150,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 #(
                     {
                         let attr : &AttrNode = &self.#fields_ident2;
-                        if attr.node_type() == AttrNodeType::Static {
+                        if attr.node_type() != AttrNodeType::Dynamic {
                             size += attr.bit_size();
                         }
                     }

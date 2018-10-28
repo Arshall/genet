@@ -90,7 +90,7 @@ trait AttrNode: AttrType {
 }
 
 trait SizedAttrNode: AttrNode {
-    fn byte_size(&self) -> usize;
+    fn bit_size(&self) -> usize;
 }
 
 struct AttrField<T: AttrNode> {
@@ -128,14 +128,14 @@ impl<T: AttrNode> AsRef<Fixed<AttrClass>> for AttrField<T> {
 }
 
 struct FixedAttrField<T: SizedAttrNode> {
-    byte_size: usize,
+    bit_size: usize,
     field: AttrField<T>,
 }
 
 impl<T: SizedAttrNode> FixedAttrField<T> {
     fn new(attr: T) -> Self {
         Self {
-            byte_size: attr.byte_size(),
+            bit_size: attr.bit_size(),
             field: AttrField::new(attr),
         }
     }
@@ -148,8 +148,8 @@ impl<T: SizedAttrNode> FixedAttrField<T> {
         self.field.init(ctx);
     }
 
-    fn byte_size(&self) -> usize {
-        self.byte_size
+    fn bit_size(&self) -> usize {
+        self.bit_size
     }
 }
 
@@ -178,7 +178,7 @@ impl AttrType for Uint8 {
 impl AttrNode for Uint8 {}
 
 impl SizedAttrNode for Uint8 {
-    fn byte_size(&self) -> usize {
+    fn bit_size(&self) -> usize {
         1
     }
 }

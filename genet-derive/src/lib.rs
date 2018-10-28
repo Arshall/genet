@@ -99,17 +99,17 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                                 if subctx.path == ctx.path {
                                     class = Some(child.class.clone());
                                 } else {
-                                    let size = attr.byte_size();
+                                    let size = attr.bit_size();
                                     attrs.push(
                                         Attr::builder(child.class.clone())
-                                            .range(byte_offset..(byte_offset + size))
+                                            .bit_range(0, byte_offset..(byte_offset + size))
                                             .build()
                                     );
                                     byte_offset += size;
                                 }
                             },
                             AttrNodeType::Padding => {
-                                byte_offset += attr.byte_size();
+                                byte_offset += attr.bit_size();
                             },
                             _ => {}
                         }
@@ -143,7 +143,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                 ::genet_sdk::attr::AttrNodeType::Static
             }
 
-            fn byte_size(&self) -> usize {
+            fn bit_size(&self) -> usize {
                 use ::genet_sdk::attr::{AttrNodeType, AttrNode};
                 let mut size = 0;
 
@@ -151,7 +151,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     {
                         let attr : &AttrNode = &self.#fields_ident2;
                         if attr.node_type() == AttrNodeType::Static {
-                            size += attr.byte_size();
+                            size += attr.bit_size();
                         }
                     }
                 )*

@@ -73,6 +73,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
     }
 
     let ident = input.ident;
+    let fields_ident2 = fields_ident.clone();
     let tokens = quote!{
         impl ::genet_sdk::attr::AttrNode for #ident {
             fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext)
@@ -116,6 +117,22 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
             fn node_type(&self) -> ::genet_sdk::attr::AttrNodeType {
                 ::genet_sdk::attr::AttrNodeType::Static
+            }
+
+            fn byte_size(&self) -> usize {
+                use ::genet_sdk::attr::{AttrNodeType, AttrNode};
+                let mut size = 0;
+
+                #(
+                    {
+                        let attr : &AttrNode = &self.#fields_ident2;
+                        if attr.node_type() == AttrNodeType::Static {
+                            size += attr.byte_size();
+                        }
+                    }
+                )*
+
+                size
             }
         }
     };

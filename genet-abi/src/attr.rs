@@ -41,6 +41,7 @@ pub enum AttrNodeType {
 pub trait AttrNode {
     fn init(&mut self, ctx: &AttrContext) -> AttrList;
     fn node_type(&self) -> AttrNodeType;
+    fn byte_size(&self) -> usize;
 }
 
 pub struct Field<T: AttrNode> {
@@ -57,6 +58,10 @@ impl<T: AttrNode> AttrNode for Field<T> {
 
     fn node_type(&self) -> AttrNodeType {
         AttrNodeType::Dynamic
+    }
+
+    fn byte_size(&self) -> usize {
+        self.attr.byte_size()
     }
 }
 

@@ -6,21 +6,19 @@ extern crate genet_derive;
 #[derive(Attr, Default)]
 /// Ethernet
 struct EthLayer {
-    /// Payload Length
-    /// Length of the payload
-    #[genet(typ = "@ipv4:addr", alias = "_.src")]
-    payload: Detach<Sub>,
+    /// Source Hardware Address
+    #[genet(alias = "_.src")]
+    src: MacAddr,
 
-    /// Nooo
-    #[genet(alias = "_.xxx", typ = "@ipv4:addr")]
-    payload_len_d: Sub,
+    /// Destination Hardware Address
+    #[genet(alias = "_.dst")]
+    dst: MacAddr,
 }
 
 #[derive(Attr, Default)]
-struct Sub {
+struct MacAddr {
+    #[genet(typ = "@eth:mac")]
     _self: Uint8,
-    #[genet(alias = "_.xxx", typ = "@ipv6:addr")]
-    payload_len: Uint8,
 }
 
 use genet_sdk::{cast, decoder::*, field::*, prelude::*};

@@ -93,8 +93,27 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
                     {
                         let subctx = #fields_ctx;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
+                        let merged = AttrContext {
+                            path: ctx.path.clone(),
+                            name: if ctx.name.is_empty() {
+                                subctx.name.clone()
+                            } else {
+                                ctx.name.clone()
+                            },
+                            description: if ctx.description.is_empty() {
+                                subctx.description.clone()
+                            } else {
+                                ctx.description.clone()
+                            },
+                            typ: if ctx.typ.is_empty() {
+                                subctx.typ.clone()
+                            } else {
+                                ctx.typ.clone()
+                            },
+                            ..AttrContext::default()
+                        };
                         let mut child = attr.init(if subctx.path == ctx.path {
-                            ctx
+                            &merged
                         } else {
                             &subctx
                         });

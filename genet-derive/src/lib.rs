@@ -97,27 +97,10 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                 #(
                     {
                         let subctx = #fields_ctx;
+                        let merged;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
-                        let merged = AttrContext {
-                            path: ctx.path.clone(),
-                            name: if ctx.name.is_empty() {
-                                subctx.name.clone()
-                            } else {
-                                ctx.name.clone()
-                            },
-                            description: if ctx.description.is_empty() {
-                                subctx.description.clone()
-                            } else {
-                                ctx.description.clone()
-                            },
-                            typ: if ctx.typ.is_empty() {
-                                subctx.typ.clone()
-                            } else {
-                                ctx.typ.clone()
-                            },
-                            ..AttrContext::default()
-                        };
                         let mut child = attr.init(if subctx.path == ctx.path {
+                            merged = subctx.clone().merge(ctx.clone());
                             &merged
                         } else {
                             &subctx

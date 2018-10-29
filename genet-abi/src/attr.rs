@@ -11,13 +11,41 @@ use token::Token;
 use variant::Variant;
 use vec::SafeVec;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct AttrContext {
     pub path: String,
     pub typ: String,
     pub name: &'static str,
     pub description: &'static str,
     pub bit_offset: usize,
+}
+
+impl AttrContext {
+    pub fn merge(self, other: AttrContext) -> AttrContext {
+        AttrContext {
+            path: if other.path.is_empty() {
+                self.path
+            } else {
+                other.path
+            },
+            typ: if other.typ.is_empty() {
+                self.typ
+            } else {
+                other.typ
+            },
+            name: if other.name.is_empty() {
+                self.name
+            } else {
+                other.name
+            },
+            description: if other.description.is_empty() {
+                self.description
+            } else {
+                other.description
+            },
+            ..self
+        }
+    }
 }
 
 #[derive(Debug)]

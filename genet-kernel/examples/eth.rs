@@ -13,12 +13,30 @@ struct EthLayer {
     /// Destination Hardware Address
     #[genet(alias = "_.dst")]
     dst: MacAddr,
+
+    /// Protocol Type
+    #[genet(typ = "@enum")]
+    r#type: Detach<EthType>,
 }
 
 #[derive(Attr, Default)]
 struct MacAddr {
     #[genet(typ = "@eth:mac")]
     _self: Uint8,
+}
+
+#[derive(Attr, Default)]
+struct EthType {
+    _self: Uint8,
+
+    /// IPv4
+    ipv4: Detach<Uint8>,
+
+    /// IPv6
+    ipv6: Detach<Uint8>,
+
+    /// ARP
+    arp: Detach<Uint8>,
 }
 
 use genet_sdk::{cast, decoder::*, field::*, prelude::*};

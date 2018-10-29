@@ -12,7 +12,7 @@ extern crate proc_macro;
 
 use inflector::cases::{camelcase::to_camel_case, titlecase::to_title_case};
 use proc_macro::TokenStream;
-use syn::{Data, DataStruct, DeriveInput, Fields};
+use syn::{Data, DataStruct, DeriveInput, Fields, Ident};
 
 mod meta;
 use meta::AttrMetadata;
@@ -27,6 +27,15 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
     }
 }
 
+fn normalize_ident(ident: &Ident) -> String {
+    let ident = ident.to_string();
+    if ident == "_self" {
+        String::new()
+    } else {
+        ident.trim_start_matches("r#").into()
+    }
+}
+
 fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
     let mut fields_ident = Vec::new();
     let mut fields_ctx = Vec::new();
@@ -36,15 +45,15 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
         for field in &f.named {
             if let Some(ident) = &field.ident {
                 let meta = AttrMetadata::parse(&field.attrs);
-                let id = ident.to_string();
-                let id = if id == "_self" {
+                let id = normalize_ident(&ident);
+                let id = if id.is_empty() {
                     String::new()
                 } else {
-                    format!(".{}", to_camel_case(&ident.to_string()))
+                    format!(".{}", to_camel_case(&id))
                 };
                 let typ = meta.typ;
                 let name = if meta.name.is_empty() {
-                    to_title_case(&ident.to_string())
+                    to_title_case(&id)
                 } else {
                     meta.name
                 };

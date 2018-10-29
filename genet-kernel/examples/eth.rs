@@ -41,7 +41,9 @@ struct EthType {
 
 use genet_sdk::{cast, decoder::*, field::*, prelude::*};
 
-struct EthWorker {}
+struct EthWorker {
+    eth: EthLayer,
+}
 
 impl Worker for EthWorker {
     fn decode(
@@ -63,6 +65,7 @@ impl Worker for EthWorker {
                 let payload = parent.data().try_get(14..)?;
                 layer.add_payload(Payload::new(payload, typ));
             }
+            layer.add_attr(attr!(self.eth.r#type.ipv4.as_ref().clone(), range: 12..14));
             parent.add_child(layer);
             Ok(Status::Done)
         } else {
@@ -84,7 +87,9 @@ impl Decoder for EthDecoder {
         });
         println!("{:#?}", ch);
 
-        Box::new(EthWorker {})
+        Box::new(EthWorker {
+            eth: EthLayer::default(),
+        })
     }
 
     fn metadata(&self) -> Metadata {

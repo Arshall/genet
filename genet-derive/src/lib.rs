@@ -11,15 +11,9 @@ extern crate inflector;
 extern crate proc_macro;
 extern crate proc_macro2;
 
-use genet_abi::attr::AttrContext;
 use inflector::cases::{camelcase::to_camel_case, titlecase::to_title_case};
 use proc_macro::TokenStream;
-use proc_macro2::TokenTree;
-use quote::ToTokens;
-use syn::{
-    Attribute, Data, DataStruct, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue, NestedMeta,
-    Type, TypePath,
-};
+use syn::{Attribute, Data, DataStruct, DeriveInput, Fields, Lit, Meta, MetaNameValue, NestedMeta};
 
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
@@ -27,7 +21,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
     match &input.data {
         Data::Struct(s) => parse_struct(&input, &s),
-        _ => TokenStream::new(),
+        _ => panic!("Attr derive supports struct types only"),
     }
 }
 

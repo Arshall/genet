@@ -1,8 +1,49 @@
 extern crate genet_sdk;
 
-use genet_sdk::{cast, decoder::*, prelude::*};
+#[macro_use]
+extern crate genet_derive;
 
-struct EthWorker {}
+#[derive(Attr, Default)]
+/// Ethernet
+struct EthLayer {
+    /// Source Hardware Address
+    #[genet(alias = "_.src")]
+    src: MacAddr,
+
+    /// Destination Hardware Address
+    #[genet(alias = "_.dst")]
+    dst: MacAddr,
+
+    /// Protocol Type
+    #[genet(typ = "@enum")]
+    type_type: Detach<EthType>,
+}
+
+#[derive(Attr, Default)]
+struct MacAddr {
+    #[genet(typ = "@eth:mac")]
+    _self: Uint8,
+}
+
+#[derive(Attr, Default)]
+struct EthType {
+    _self: Uint8,
+
+    /// IPv4
+    ipv4: Detach<Uint8>,
+
+    /// IPv6
+    ipv6: Detach<Uint8>,
+
+    /// ARP
+    arp: Detach<Uint8>,
+}
+
+use genet_sdk::{cast, decoder::*, field::*, prelude::*};
+
+struct EthWorker {
+    eth: EthLayer,
+}
 
 impl Worker for EthWorker {
     fn decode(
@@ -24,7 +65,7 @@ impl Worker for EthWorker {
                 let payload = parent.data().try_get(14..)?;
                 layer.add_payload(Payload::new(payload, typ));
             }
-
+            layer.add_attr(attr!(self.eth.type_type.ipv4.as_ref().clone(), range: 12..14));
             parent.add_child(layer);
             Ok(Status::Done)
         } else {
@@ -38,7 +79,15 @@ struct EthDecoder {}
 
 impl Decoder for EthDecoder {
     fn new_worker(&self, _ctx: &Context) -> Box<Worker> {
-        Box::new(EthWorker {})
+        use genet_sdk::attr::{AttrContext, AttrNode};
+        let mut eth = EthLayer::default();
+        let ch = eth.init(&AttrContext {
+            path: "eth".into(),
+            ..AttrContext::default()
+        });
+        println!("{:#?}", ch);
+
+        Box::new(EthWorker { eth })
     }
 
     fn metadata(&self) -> Metadata {

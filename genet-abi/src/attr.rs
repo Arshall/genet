@@ -56,6 +56,24 @@ pub struct AttrList {
     pub aliases: Vec<(String, String)>,
 }
 
+impl AttrList {
+    pub fn from_ctx<C: Cast>(ctx: &AttrContext, cast: C) -> AttrList {
+        AttrList {
+            class: Fixed::new(
+                AttrClass::builder(ctx.path.clone())
+                    .cast(cast)
+                    .typ(ctx.typ.clone())
+                    .name(ctx.name)
+                    .description(ctx.description)
+                    .build(),
+            ),
+            children: Vec::new(),
+            attrs: Vec::new(),
+            aliases: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum AttrNodeType {
     Static,

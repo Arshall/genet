@@ -9,7 +9,6 @@ extern crate syn;
 extern crate genet_abi;
 extern crate inflector;
 extern crate proc_macro;
-extern crate proc_macro2;
 
 use inflector::cases::{camelcase::to_camel_case, titlecase::to_title_case};
 use proc_macro::TokenStream;

@@ -1,30 +1,15 @@
 //! Attribute field types.
 
 use cast;
-pub use genet_abi::field::*;
-use genet_abi::{
-    attr::{AttrClass, AttrContext, AttrList, AttrNode, AttrNodeType},
-    fixed::Fixed,
-};
+use genet_abi::attr::{AttrContext, AttrList, AttrNode, AttrNodeType};
+pub use genet_abi::field::Detach;
 
 #[derive(Default)]
 pub struct Uint8 {}
 
 impl AttrNode for Uint8 {
     fn init(&mut self, ctx: &AttrContext) -> AttrList {
-        AttrList {
-            class: Fixed::new(
-                AttrClass::builder(ctx.path.clone())
-                    .cast(cast::UInt8())
-                    .typ(ctx.typ.clone())
-                    .name(ctx.name)
-                    .description(ctx.description)
-                    .build(),
-            ),
-            children: Vec::new(),
-            attrs: Vec::new(),
-            aliases: Vec::new(),
-        }
+        AttrList::from_ctx(ctx, cast::UInt8())
     }
 
     fn node_type(&self) -> AttrNodeType {

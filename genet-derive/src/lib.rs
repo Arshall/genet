@@ -13,7 +13,10 @@ extern crate proc_macro2;
 
 use inflector::cases::{camelcase::to_camel_case, titlecase::to_title_case};
 use proc_macro::TokenStream;
-use syn::{Attribute, Data, DataStruct, DeriveInput, Fields, Lit, Meta, MetaNameValue, NestedMeta};
+use syn::{Data, DataStruct, DeriveInput, Fields};
+
+mod meta;
+use meta::AttrMetadata;
 
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
@@ -33,7 +36,7 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
     if let Fields::Named(f) = &s.fields {
         for field in &f.named {
             if let Some(ident) = &field.ident {
-                let meta = parse_attrs(&field.attrs);
+                let meta = AttrMetadata::parse(&field.attrs);
                 let id = ident.to_string();
                 let id = if id == "_self" {
                     String::new()
@@ -67,7 +70,7 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
         }
     }
 
-    let self_attrs = parse_attrs(&input.attrs);
+    let self_attrs = AttrMetadata::parse(&input.attrs);
     let self_name = self_attrs.name;
     let self_desc = self_attrs.description;
 
@@ -176,67 +179,4 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
     };
 
     tokens.into()
-}
-
-struct AttrMetadata {
-    pub typ: String,
-    pub name: String,
-    pub description: String,
-    pub aliases: Vec<String>,
-}
-
-fn parse_attrs(attrs: &[Attribute]) -> AttrMetadata {
-    let mut typ = String::new();
-    let mut aliases = Vec::new();
-    let mut docs = String::new();
-    for attr in attrs {
-        if let Some(meta) = attr.interpret_meta() {
-            let name = meta.name().to_string();
-            match (name.as_str(), meta) {
-                (
-                    "doc",
-                    Meta::NameValue(MetaNameValue {
-                        lit: Lit::Str(lit_str),
-                        ..
-                    }),
-                ) => {
-                    docs += &lit_str.value();
-                    docs += "\n";
-                }
-                ("genet", Meta::List(list)) => {
-                    for item in list.nested {
-                        if let NestedMeta::Meta(meta) = item {
-                            let name = meta.name().to_string();
-                            if let Meta::NameValue(MetaNameValue {
-                                lit: Lit::Str(lit_str),
-                                ..
-                            }) = meta
-                            {
-                                match name.as_str() {
-                                    "typ" => {
-                                        typ = lit_str.value().to_string();
-                                    }
-                                    "alias" => {
-                                        aliases.push(lit_str.value().to_string());
-                                    }
-                                    _ => panic!("unsupported attribute: {}", name),
-                                }
-                            }
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-    let mut lines = docs.split('\n').map(|line| line.trim());
-    let name = lines.next().unwrap_or("");
-    let description = lines.fold(String::new(), |acc, x| acc + x + "\n");
-
-    AttrMetadata {
-        typ: typ.trim().into(),
-        name: name.into(),
-        description: description.trim().into(),
-        aliases,
-    }
 }

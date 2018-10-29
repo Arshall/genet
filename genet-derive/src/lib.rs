@@ -46,11 +46,7 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
             if let Some(ident) = &field.ident {
                 let meta = AttrMetadata::parse(&field.attrs);
                 let id = normalize_ident(&ident);
-                let id = if id.is_empty() {
-                    String::new()
-                } else {
-                    format!(".{}", to_camel_case(&id))
-                };
+                let id = format!(".{}", to_camel_case(&id));
                 let typ = meta.typ;
                 let name = if meta.name.is_empty() {
                     to_title_case(&id)
@@ -60,7 +56,8 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                 let desc = meta.description;
                 fields_ctx.push(quote!{
                     AttrContext{
-                        path: format!("{}{}", ctx.path, #id),
+                        path: format!("{}{}", ctx.path, #id)
+                            .trim_matches('.').into(),
                         typ: #typ.into(),
                         name: #name.into(),
                         description: #desc.into(),

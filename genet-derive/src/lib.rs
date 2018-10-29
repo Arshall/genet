@@ -80,11 +80,11 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
     let ident = &input.ident;
     let fields_ident2 = fields_ident.clone();
     let tokens = quote!{
-        impl ::genet_sdk::attr::AttrNode for #ident {
+        impl genet_sdk::attr::AttrNode for #ident {
             fn init(&mut self, ctx: &::genet_sdk::attr::AttrContext)
-                -> ::genet_sdk::attr::AttrList {
-                use ::genet_sdk::attr::{Attr, AttrNode, AttrList, AttrContext, AttrClass, AttrNodeType};
-                use ::genet_sdk::fixed::Fixed;
+                -> genet_sdk::attr::AttrList {
+                use genet_sdk::attr::{Attr, AttrNode, AttrList, AttrContext, AttrClass, AttrNodeType};
+                use genet_sdk::fixed::Fixed;
 
                 let mut class = None;
                 let mut bit_offset = ctx.bit_offset;
@@ -175,12 +175,12 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                 }
             }
 
-            fn node_type(&self) -> ::genet_sdk::attr::AttrNodeType {
-                ::genet_sdk::attr::AttrNodeType::Static
+            fn node_type(&self) -> genet_sdk::attr::AttrNodeType {
+                genet_sdk::attr::AttrNodeType::Static
             }
 
             fn bit_size(&self) -> usize {
-                use ::genet_sdk::attr::{AttrNodeType, AttrNode};
+                use genet_sdk::attr::{AttrNodeType, AttrNode};
                 let mut size = 0;
 
                 #(

@@ -17,52 +17,57 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenTree;
 use quote::ToTokens;
 use syn::{
-    Attribute, Data, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue, NestedMeta, Type,
-    TypePath,
+    Attribute, Data, DataStruct, DeriveInput, Fields, Ident, Lit, Meta, MetaNameValue, NestedMeta,
+    Type, TypePath,
 };
 
 #[proc_macro_derive(Attr, attributes(genet))]
 pub fn derive_attr(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
 
+    match &input.data {
+        Data::Struct(s) => parse_struct(&input, &s),
+        _ => TokenStream::new(),
+    }
+}
+
+fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
     let mut fields_ident = Vec::new();
     let mut fields_ctx = Vec::new();
     let mut fields_aliases = Vec::new();
 
-    if let Data::Struct(s) = input.data {
-        if let Fields::Named(f) = s.fields {
-            for field in f.named {
-                if let Some(ident) = field.ident {
-                    let meta = parse_attrs(&field.attrs);
-                    let id = ident.to_string();
-                    let id = if id == "_self" {
-                        String::new()
-                    } else {
-                        format!(".{}", to_camel_case(&ident.to_string()))
-                    };
-                    let typ = meta.typ;
-                    let name = if meta.name.is_empty() {
-                        to_title_case(&ident.to_string())
-                    } else {
-                        meta.name
-                    };
-                    let desc = meta.description;
-                    fields_ctx.push(quote!{
-                        AttrContext{
-                            path: format!("{}{}", ctx.path, #id),
-                            typ: #typ.into(),
-                            name: #name.into(),
-                            description: #desc.into(),
-                            ..Default::default()
-                        }
-                    });
-                    fields_ident.push(ident);
-
-                    for name in meta.aliases {
-                        fields_aliases.push(quote!{
-                            (format!("{}", #name), format!("{}{}", ctx.path, #id))
-                        });
+    if let Fields::Named(f) = &s.fields {
+        for field in &f.named {
+            if let Some(ident) = &field.ident {
+                let meta = parse_attrs(&field.attrs);
+                let id = ident.to_string();
+                let id = if id == "_self" {
+                    String::new()
+                } else {
+                    format!(".{}", to_camel_case(&ident.to_string()))
+                };
+                let typ = meta.typ;
+                let name = if meta.name.is_empty() {
+                    to_title_case(&ident.to_string())
+                } else {
+                    meta.name
+                };
+                let desc = meta.description;
+                fields_ctx.push(quote!{
+                    AttrContext{
+                        path: format!("{}{}", ctx.path, #id),
+                        typ: #typ.into(),
+                        name: #name.into(),
+                        description: #desc.into(),
+                        ..Default::default()
                     }
+                });
+                fields_ident.push(ident);
+
+                for name in meta.aliases {
+                    fields_aliases.push(quote!{
+                        (format!("{}", #name), format!("{}{}", ctx.path, #id))
+                    });
                 }
             }
         }
@@ -72,7 +77,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
     let self_name = self_attrs.name;
     let self_desc = self_attrs.description;
 
-    let ident = input.ident;
+    let ident = &input.ident;
     let fields_ident2 = fields_ident.clone();
     let tokens = quote!{
         impl ::genet_sdk::attr::AttrNode for #ident {
@@ -192,8 +197,6 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
             }
         }
     };
-
-    // println!("{}", tokens.to_string());
 
     tokens.into()
 }

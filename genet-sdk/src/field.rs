@@ -6,7 +6,6 @@ use genet_abi::{
     attr::{AttrClass, AttrContext, AttrList, AttrNode, AttrNodeType},
     fixed::Fixed,
 };
-use std::ops::Deref;
 
 #[derive(Default)]
 pub struct Uint8 {}

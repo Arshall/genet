@@ -5,12 +5,6 @@ extern crate genet_derive;
 
 #[derive(Attr, Default)]
 /// Ethernet
-struct Attrs {
-    eth: Eth,
-}
-
-#[derive(Attr, Default)]
-/// Ethernet
 struct Eth {
     /// Source Hardware Address
     #[genet(alias = "_.src")]
@@ -48,7 +42,7 @@ struct EthType {
 use genet_sdk::{cast, decoder::*, field::*, prelude::*};
 
 struct EthWorker {
-    attrs: Attrs,
+    eth: LayerBox<Eth>,
 }
 
 impl Worker for EthWorker {
@@ -71,7 +65,7 @@ impl Worker for EthWorker {
                 let payload = parent.data().try_get(14..)?;
                 layer.add_payload(Payload::new(payload, typ));
             }
-            layer.add_attr(attr!(self.attrs.eth.type_type.ipv4.as_ref().clone(), range: 12..14));
+            layer.add_attr(attr!(self.eth.attr().type_type.ipv4.as_ref().clone(), range: 12..14));
             parent.add_child(layer);
             Ok(Status::Done)
         } else {
@@ -85,12 +79,8 @@ struct EthDecoder {}
 
 impl Decoder for EthDecoder {
     fn new_worker(&self, _ctx: &Context) -> Box<Worker> {
-        use genet_sdk::attr::{AttrContext, AttrNode};
-        let mut attrs = Attrs::default();
-        let ch = attrs.init(&AttrContext::default());
-        println!("{:#?}", ch);
-
-        Box::new(EthWorker { attrs })
+        let eth = LayerBox::new("eth", Eth::default());
+        Box::new(EthWorker { eth })
     }
 
     fn metadata(&self) -> Metadata {

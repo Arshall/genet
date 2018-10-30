@@ -351,6 +351,26 @@ struct Alias {
     target: Token,
 }
 
+pub struct LayerBox<A: AttrNode> {
+    attr: A,
+}
+
+impl<A: AttrNode> LayerBox<A> {
+    pub fn new<T: Into<Token>>(id: T, attr: A) -> Self {
+        let id: Token = id.into();
+        let mut attr = attr;
+        attr.init(&AttrContext {
+            path: id.to_string(),
+            ..AttrContext::default()
+        });
+        Self { attr }
+    }
+
+    pub fn attr(&self) -> &A {
+        &self.attr
+    }
+}
+
 /// A layer class object.
 #[repr(C)]
 pub struct LayerClass {

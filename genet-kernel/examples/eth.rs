@@ -18,7 +18,7 @@ struct Eth {
 
     /// Protocol Type
     #[genet(typ = "@enum")]
-    r#type: Detach<EthType>,
+    r#type: Node<Uint8, EthType>,
 }
 
 type DUint8 = Detach<Uint8>;
@@ -28,9 +28,9 @@ struct EthType {
     /// IPv4
     ipv4: DUint8,
     /// IPv6
-    ipv6: DUint8,
+    ipv6: Uint8,
     /// ARP
-    arp: DUint8,
+    arp: Uint8,
 }
 
 use genet_sdk::{cast, decoder::*, field::*, prelude::*};
@@ -59,7 +59,9 @@ impl Worker for EthWorker {
                 let payload = parent.data().try_get(14..)?;
                 layer.add_payload(Payload::new(payload, typ));
             }
-            layer.add_attr(attr!(self.eth.attr().r#type.ipv4.as_ref().clone(), range: 12..14));
+            layer.add_attr(
+                attr!(self.eth.attr().r#type.attrs().ipv4.as_ref().clone(), range: 12..14),
+            );
             parent.add_child(layer);
             Ok(Status::Done)
         } else {

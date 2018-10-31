@@ -95,6 +95,7 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                 #(
                     {
                         let mut subctx = #fields_ctx;
+                        subctx.bit_offset = bit_offset;
                         let attr : &mut AttrField = &mut self.#fields_ident;
                         if ctx.detached || attr.node_type() == AttrFieldType::Detached {
                             subctx.detached = true

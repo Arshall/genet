@@ -2,7 +2,7 @@
 
 use cast;
 use genet_abi::attr::{AttrContext, AttrField, AttrFieldType, AttrList};
-pub use genet_abi::field::Detach;
+pub use genet_abi::field::{Detach, Node};
 
 #[derive(Default)]
 pub struct Uint8 {}

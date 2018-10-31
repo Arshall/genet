@@ -6,6 +6,8 @@ extern crate genet_derive;
 #[derive(Attr, Default)]
 /// Ethernet
 struct Eth {
+    _pad: BytePad2,
+
     /// Source Hardware Address
     #[genet(alias = "_.src", typ = "@eth:mac")]
     src: Uint8,

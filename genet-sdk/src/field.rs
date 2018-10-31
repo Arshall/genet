@@ -13,7 +13,7 @@ impl AttrNode for Uint8 {
     }
 
     fn node_type(&self) -> AttrNodeType {
-        AttrNodeType::Static
+        AttrNodeType::Attached
     }
 
     fn bit_size(&self) -> usize {

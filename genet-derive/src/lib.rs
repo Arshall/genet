@@ -94,11 +94,14 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
 
                 #(
                     {
-                        let subctx = #fields_ctx;
+                        let mut subctx = #fields_ctx;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
+                        if ctx.detached || attr.node_type() == AttrNodeType::Detached {
+                            subctx.detached = true
+                        }
                         let mut child = attr.init(&subctx);
                         match attr.node_type() {
-                            AttrNodeType::Static => {
+                            AttrNodeType::Attached => {
                                 let size = attr.bit_size();
                                 attrs.push(
                                     Attr::builder(child.class.clone())
@@ -114,12 +117,12 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                         }
 
                         if (attr.node_type() != AttrNodeType::Padding) {
-                            if subctx.path != ctx.path {
-                                children.push(child.class.clone());
-                                children.append(&mut child.children);
+                            children.push(child.class.clone());
+                            children.append(&mut child.children);
+                            if (!subctx.detached) {
                                 attrs.append(&mut child.attrs);
-                                aliases.append(&mut child.aliases);
                             }
+                            aliases.append(&mut child.aliases);
                         }
                     }
                 )*
@@ -147,7 +150,7 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
             }
 
             fn node_type(&self) -> genet_sdk::attr::AttrNodeType {
-                genet_sdk::attr::AttrNodeType::Static
+                genet_sdk::attr::AttrNodeType::Attached
             }
 
             fn bit_size(&self) -> usize {
@@ -157,7 +160,7 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                 #(
                     {
                         let attr : &AttrNode = &self.#fields_ident2;
-                        if attr.node_type() != AttrNodeType::Dynamic {
+                        if attr.node_type() != AttrNodeType::Detached {
                             size += attr.bit_size();
                         }
                     }

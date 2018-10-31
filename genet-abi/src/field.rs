@@ -15,7 +15,7 @@ impl<T: AttrNode> AttrNode for Detach<T> {
     }
 
     fn node_type(&self) -> AttrNodeType {
-        AttrNodeType::Dynamic
+        AttrNodeType::Detached
     }
 
     fn bit_size(&self) -> usize {

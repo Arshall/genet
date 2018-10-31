@@ -247,8 +247,8 @@ dependencies = [
  "Inflector 0.11.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "genet-abi 0.5.0",
  "proc-macro2 0.4.20 (registry+https://github.com/rust-lang/crates.io-index)",
- "quote 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 0.15.14 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 0.6.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.15.16 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -727,11 +727,11 @@ name = "regex"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "aho-corasick 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "memchr 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "aho-corasick 0.6.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "memchr 2.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex-syntax 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "thread_local 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "utf8-ranges 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "utf8-ranges 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -747,7 +747,7 @@ name = "regex-syntax"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "ucd-util 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ucd-util 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

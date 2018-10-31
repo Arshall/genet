@@ -1,4 +1,4 @@
-use attr::{Attr, AttrContext, AttrNode};
+use attr::{Attr, AttrContext, AttrField};
 use fixed::{Fixed, MutFixed};
 use metadata::Metadata;
 use slice::ByteSlice;
@@ -351,11 +351,11 @@ struct Alias {
     target: Token,
 }
 
-pub struct LayerBox<A: AttrNode> {
+pub struct LayerBox<A: AttrField> {
     attr: A,
 }
 
-impl<A: AttrNode> LayerBox<A> {
+impl<A: AttrField> LayerBox<A> {
     pub fn new<T: Into<Token>>(id: T, attr: A) -> Self {
         let id: Token = id.into();
         let mut attr = attr;
@@ -404,7 +404,7 @@ impl LayerClass {
         }
     }
 
-    pub fn new<T: Into<Token>, A: AttrNode>(id: T, attr: A) -> LayerClass {
+    pub fn new<T: Into<Token>, A: AttrField>(id: T, attr: A) -> LayerClass {
         let id = id.into();
         let mut attr = attr;
         let tree = attr.init(&AttrContext {

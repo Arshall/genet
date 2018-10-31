@@ -1,19 +1,19 @@
 //! Attribute field types.
 
 use cast;
-use genet_abi::attr::{AttrContext, AttrList, AttrNode, AttrNodeType};
+use genet_abi::attr::{AttrContext, AttrField, AttrFieldType, AttrList};
 pub use genet_abi::field::Detach;
 
 #[derive(Default)]
 pub struct Uint8 {}
 
-impl AttrNode for Uint8 {
+impl AttrField for Uint8 {
     fn init(&mut self, ctx: &AttrContext) -> AttrList {
         AttrList::from_ctx(ctx, cast::UInt8())
     }
 
-    fn node_type(&self) -> AttrNodeType {
-        AttrNodeType::Attached
+    fn node_type(&self) -> AttrFieldType {
+        AttrFieldType::Attached
     }
 
     fn bit_size(&self) -> usize {
@@ -26,13 +26,13 @@ macro_rules! impl_pad {
         #[derive(Default)]
         pub struct $id {}
 
-        impl AttrNode for $id {
+        impl AttrField for $id {
             fn init(&mut self, ctx: &AttrContext) -> AttrList {
                 AttrList::from_ctx(ctx, cast::UInt8())
             }
 
-            fn node_type(&self) -> AttrNodeType {
-                AttrNodeType::Padding
+            fn node_type(&self) -> AttrFieldType {
+                AttrFieldType::Padding
             }
 
             fn bit_size(&self) -> usize {
@@ -61,13 +61,13 @@ impl BytePad {
     }
 }
 
-impl AttrNode for BytePad {
+impl AttrField for BytePad {
     fn init(&mut self, ctx: &AttrContext) -> AttrList {
         AttrList::from_ctx(ctx, cast::UInt8())
     }
 
-    fn node_type(&self) -> AttrNodeType {
-        AttrNodeType::Padding
+    fn node_type(&self) -> AttrFieldType {
+        AttrFieldType::Padding
     }
 
     fn bit_size(&self) -> usize {

@@ -1,21 +1,21 @@
-use attr::{AttrClass, AttrContext, AttrList, AttrNode, AttrNodeType};
+use attr::{AttrClass, AttrContext, AttrField, AttrFieldType, AttrList};
 use fixed::Fixed;
 use std::ops::Deref;
 
-pub struct Detach<T: AttrNode> {
+pub struct Detach<T: AttrField> {
     attr: T,
     class: Option<Fixed<AttrClass>>,
 }
 
-impl<T: AttrNode> AttrNode for Detach<T> {
+impl<T: AttrField> AttrField for Detach<T> {
     fn init(&mut self, ctx: &AttrContext) -> AttrList {
         let child = self.attr.init(ctx);
         self.class = Some(child.class.clone());
         child
     }
 
-    fn node_type(&self) -> AttrNodeType {
-        AttrNodeType::Detached
+    fn node_type(&self) -> AttrFieldType {
+        AttrFieldType::Detached
     }
 
     fn bit_size(&self) -> usize {
@@ -23,7 +23,7 @@ impl<T: AttrNode> AttrNode for Detach<T> {
     }
 }
 
-impl<T: AttrNode> Deref for Detach<T> {
+impl<T: AttrField> Deref for Detach<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -31,7 +31,7 @@ impl<T: AttrNode> Deref for Detach<T> {
     }
 }
 
-impl<T: AttrNode + Default> Default for Detach<T> {
+impl<T: AttrField + Default> Default for Detach<T> {
     fn default() -> Self {
         Self {
             attr: T::default(),
@@ -40,7 +40,7 @@ impl<T: AttrNode + Default> Default for Detach<T> {
     }
 }
 
-impl<T: AttrNode> AsRef<Fixed<AttrClass>> for Detach<T> {
+impl<T: AttrField> AsRef<Fixed<AttrClass>> for Detach<T> {
     fn as_ref(&self) -> &Fixed<AttrClass> {
         self.class.as_ref().unwrap()
     }

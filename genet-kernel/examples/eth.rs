@@ -21,16 +21,16 @@ struct Eth {
     r#type: Detach<EthType>,
 }
 
+type DUint8 = Detach<Uint8>;
+
 #[derive(Attr, Default)]
 struct EthType {
     /// IPv4
-    ipv4: Detach<Uint8>,
-
+    ipv4: DUint8,
     /// IPv6
-    ipv6: Detach<Uint8>,
-
+    ipv6: DUint8,
     /// ARP
-    arp: Detach<Uint8>,
+    arp: DUint8,
 }
 
 use genet_sdk::{cast, decoder::*, field::*, prelude::*};

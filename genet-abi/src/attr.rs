@@ -48,15 +48,15 @@ impl AttrList {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum AttrNodeType {
+pub enum AttrFieldType {
     Attached,
     Detached,
     Padding,
 }
 
-pub trait AttrNode {
+pub trait AttrField {
     fn init(&mut self, ctx: &AttrContext) -> AttrList;
-    fn node_type(&self) -> AttrNodeType;
+    fn node_type(&self) -> AttrFieldType;
     fn bit_size(&self) -> usize;
 }
 

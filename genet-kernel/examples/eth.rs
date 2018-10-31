@@ -7,28 +7,20 @@ extern crate genet_derive;
 /// Ethernet
 struct Eth {
     /// Source Hardware Address
-    #[genet(alias = "_.src")]
-    src: MacAddr,
+    #[genet(alias = "_.src", typ = "@eth:mac")]
+    src: Uint8,
 
     /// Destination Hardware Address
-    #[genet(alias = "_.dst")]
-    dst: MacAddr,
+    #[genet(alias = "_.dst", typ = "@eth:mac")]
+    dst: Uint8,
 
     /// Protocol Type
     #[genet(typ = "@enum")]
-    type_type: Detach<EthType>,
-}
-
-#[derive(Attr, Default)]
-struct MacAddr {
-    #[genet(typ = "@eth:mac")]
-    _self: Uint8,
+    r#type: Detach<EthType>,
 }
 
 #[derive(Attr, Default)]
 struct EthType {
-    _self: Uint8,
-
     /// IPv4
     ipv4: Detach<Uint8>,
 
@@ -65,7 +57,7 @@ impl Worker for EthWorker {
                 let payload = parent.data().try_get(14..)?;
                 layer.add_payload(Payload::new(payload, typ));
             }
-            layer.add_attr(attr!(self.eth.attr().type_type.ipv4.as_ref().clone(), range: 12..14));
+            layer.add_attr(attr!(self.eth.attr().r#type.ipv4.as_ref().clone(), range: 12..14));
             parent.add_child(layer);
             Ok(Status::Done)
         } else {

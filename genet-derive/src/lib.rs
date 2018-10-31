@@ -29,11 +29,7 @@ pub fn derive_attr(input: TokenStream) -> TokenStream {
 
 fn normalize_ident(ident: &Ident) -> String {
     let ident = ident.to_string();
-    if ident == "_self" {
-        String::new()
-    } else {
-        ident.trim_start_matches("r#").into()
-    }
+    ident.trim_start_matches("r#").into()
 }
 
 fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
@@ -99,27 +95,17 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
                 #(
                     {
                         let subctx = #fields_ctx;
-                        let merged;
                         let attr : &mut AttrNode = &mut self.#fields_ident;
-                        let mut child = attr.init(if subctx.path == ctx.path {
-                            merged = subctx.clone().merge(ctx.clone());
-                            &merged
-                        } else {
-                            &subctx
-                        });
+                        let mut child = attr.init(&subctx);
                         match attr.node_type() {
                             AttrNodeType::Static => {
-                                if subctx.path == ctx.path {
-                                    class = Some(child.class.clone());
-                                } else {
-                                    let size = attr.bit_size();
-                                    attrs.push(
-                                        Attr::builder(child.class.clone())
-                                            .bit_range(0, bit_offset..(bit_offset + size))
-                                            .build()
-                                    );
-                                    bit_offset += size;
-                                }
+                                let size = attr.bit_size();
+                                attrs.push(
+                                    Attr::builder(child.class.clone())
+                                        .bit_range(0, bit_offset..(bit_offset + size))
+                                        .build()
+                                );
+                                bit_offset += size;
                             },
                             AttrNodeType::Padding => {
                                 bit_offset += attr.bit_size();
@@ -170,7 +156,6 @@ fn parse_struct(input: &DeriveInput, s: &DataStruct) -> TokenStream {
 
                 #(
                     {
-                        // TODO: ignore _self
                         let attr : &AttrNode = &self.#fields_ident2;
                         if attr.node_type() != AttrNodeType::Dynamic {
                             size += attr.bit_size();

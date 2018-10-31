@@ -30,6 +30,16 @@ struct EthType {
     /// IPv6
     ipv6: Uint8,
     /// ARP
+    arp: Node<Uint8, EthType2>,
+}
+
+#[derive(Attr, Default)]
+struct EthType2 {
+    /// IPv4
+    ipv4: Uint8,
+    /// IPv6
+    ipv6: Uint8,
+    /// ARP
     arp: Uint8,
 }
 
@@ -60,7 +70,7 @@ impl Worker for EthWorker {
                 layer.add_payload(Payload::new(payload, typ));
             }
             layer.add_attr(
-                attr!(self.eth.attr().r#type.attrs().ipv4.as_ref().clone(), range: 12..14),
+                attr!(self.eth.attr().r#type.fields().ipv4.as_ref().clone(), range: 12..14),
             );
             parent.add_child(layer);
             Ok(Status::Done)
